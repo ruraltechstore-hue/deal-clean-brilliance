@@ -1,4 +1,4 @@
-import { MessageCircle, Phone, MapPin } from "lucide-react";
+import { Phone, MapPin } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
