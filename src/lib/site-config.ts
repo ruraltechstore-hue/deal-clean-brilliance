@@ -4,14 +4,11 @@
  * Later these values can be moved into a database (see db-schema.ts).
  */
 
-import bottle from "@/assets/deal-bottle.png.asset.json";
-import logo from "@/assets/deal-logo.png.asset.json";
-
 export const brand = {
   name: "DEAL Cleaning Products",
   company: "SP Enterprises",
   address: "Katedan, Hyderabad",
-  logoUrl: logo.url,
+  logoUrl: "/assets/deal-logo.png",
 };
 
 export const product = {
@@ -23,7 +20,7 @@ export const product = {
   /** Set to false to show "Out of Stock" */
   available: true,
   stock: 250,
-  imageUrl: bottle.url,
+  imageUrl: "/assets/deal-bottle.png",
   description:
     "A powerful multipurpose cleaning solution designed to clean, shine, and freshen a wide range of surfaces.",
 };

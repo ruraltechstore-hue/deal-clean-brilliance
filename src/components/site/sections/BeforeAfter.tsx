@@ -1,17 +1,14 @@
 import { Reveal } from "@/components/site/Reveal";
-import baTile from "@/assets/ba-tile.jpg";
-import baKitchen from "@/assets/ba-kitchen.jpg";
-import baFloor from "@/assets/ba-floor.jpg";
 
-/** Swap these image imports to use your own before/after photos. */
+/** Swap these image paths to use your own before/after photos. */
 const results = [
-  { src: baTile, title: "Tiles", text: "Dull, dusty tiles wiped down to a bright finish." },
+  { src: "/assets/ba-tile.jpg", title: "Tiles", text: "Dull, dusty tiles wiped down to a bright finish." },
   {
-    src: baKitchen,
+    src: "/assets/ba-kitchen.jpg",
     title: "Kitchen Surfaces",
     text: "Everyday kitchen grime cleared from platforms and steel.",
   },
-  { src: baFloor, title: "Floors", text: "Regular mopping leaves floors looking fresh." },
+  { src: "/assets/ba-floor.jpg", title: "Floors", text: "Regular mopping leaves floors looking fresh." },
 ];
 
 export function BeforeAfter() {
