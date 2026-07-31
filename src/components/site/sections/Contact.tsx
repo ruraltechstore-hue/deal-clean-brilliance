@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Reveal } from "@/components/site/Reveal";
+import { isSupabaseConfigured } from "@/integrations/supabase/client";
+import { adminService } from "@/services/adminService";
 import { brand, contact } from "@/lib/site-config";
 
 const schema = z.object({
@@ -25,9 +27,10 @@ export function Contact() {
   const [errors, setErrors] = useState<Errors>({});
   const [sent, setSent] = useState(false);
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const fd = new FormData(form);
     const parsed = schema.safeParse({
       name: String(fd.get("name") ?? ""),
       phone: String(fd.get("phone") ?? ""),
@@ -46,8 +49,18 @@ export function Contact() {
     }
 
     setErrors({});
+    if (isSupabaseConfigured) {
+      try {
+        await adminService.submitMessage(parsed.data);
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Could not send your message. Please call us.",
+        );
+        return;
+      }
+    }
     setSent(true);
-    e.currentTarget.reset();
+    form.reset();
     toast.success("Thanks! Your message has been recorded. We'll call you back shortly.");
   };
 

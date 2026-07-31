@@ -12,7 +12,18 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as OrderConfirmedRouteImport } from './routes/order-confirmed'
+import { Route as AdminProtectedRouteRouteImport } from './routes/admin/_protected/route'
+import { Route as AdminForgotPasswordRouteImport } from './routes/admin/forgot-password'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as AdminResetPasswordRouteImport } from './routes/admin/reset-password'
 import { Route as PoliciesSlugRouteImport } from './routes/policies.$slug'
+import { Route as AdminProtectedContactMessagesRouteImport } from './routes/admin/_protected/contact-messages'
+import { Route as AdminProtectedCustomersRouteImport } from './routes/admin/_protected/customers'
+import { Route as AdminProtectedDashboardRouteImport } from './routes/admin/_protected/dashboard'
+import { Route as AdminProtectedOrdersRouteImport } from './routes/admin/_protected/orders'
+import { Route as AdminProtectedProductRouteImport } from './routes/admin/_protected/product'
+import { Route as AdminProtectedReviewsRouteImport } from './routes/admin/_protected/reviews'
+import { Route as AdminProtectedSettingsRouteImport } from './routes/admin/_protected/settings'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,43 +40,182 @@ const OrderConfirmedRoute = OrderConfirmedRouteImport.update({
   path: '/order-confirmed',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminProtectedRouteRoute = AdminProtectedRouteRouteImport.update({
+  id: '/admin/_protected',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminForgotPasswordRoute = AdminForgotPasswordRouteImport.update({
+  id: '/admin/forgot-password',
+  path: '/admin/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminResetPasswordRoute = AdminResetPasswordRouteImport.update({
+  id: '/admin/reset-password',
+  path: '/admin/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PoliciesSlugRoute = PoliciesSlugRouteImport.update({
   id: '/policies/$slug',
   path: '/policies/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminProtectedContactMessagesRoute =
+  AdminProtectedContactMessagesRouteImport.update({
+    id: '/contact-messages',
+    path: '/contact-messages',
+    getParentRoute: () => AdminProtectedRouteRoute,
+  } as any)
+const AdminProtectedCustomersRoute = AdminProtectedCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
+  getParentRoute: () => AdminProtectedRouteRoute,
+} as any)
+const AdminProtectedDashboardRoute = AdminProtectedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AdminProtectedRouteRoute,
+} as any)
+const AdminProtectedOrdersRoute = AdminProtectedOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AdminProtectedRouteRoute,
+} as any)
+const AdminProtectedProductRoute = AdminProtectedProductRouteImport.update({
+  id: '/product',
+  path: '/product',
+  getParentRoute: () => AdminProtectedRouteRoute,
+} as any)
+const AdminProtectedReviewsRoute = AdminProtectedReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => AdminProtectedRouteRoute,
+} as any)
+const AdminProtectedSettingsRoute = AdminProtectedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminProtectedRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/checkout': typeof CheckoutRoute
   '/order-confirmed': typeof OrderConfirmedRoute
+  '/admin': typeof AdminProtectedRouteRouteWithChildren
+  '/admin/forgot-password': typeof AdminForgotPasswordRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/reset-password': typeof AdminResetPasswordRoute
   '/policies/$slug': typeof PoliciesSlugRoute
+  '/admin/contact-messages': typeof AdminProtectedContactMessagesRoute
+  '/admin/customers': typeof AdminProtectedCustomersRoute
+  '/admin/dashboard': typeof AdminProtectedDashboardRoute
+  '/admin/orders': typeof AdminProtectedOrdersRoute
+  '/admin/product': typeof AdminProtectedProductRoute
+  '/admin/reviews': typeof AdminProtectedReviewsRoute
+  '/admin/settings': typeof AdminProtectedSettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/checkout': typeof CheckoutRoute
   '/order-confirmed': typeof OrderConfirmedRoute
+  '/admin': typeof AdminProtectedRouteRouteWithChildren
+  '/admin/forgot-password': typeof AdminForgotPasswordRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/reset-password': typeof AdminResetPasswordRoute
   '/policies/$slug': typeof PoliciesSlugRoute
+  '/admin/contact-messages': typeof AdminProtectedContactMessagesRoute
+  '/admin/customers': typeof AdminProtectedCustomersRoute
+  '/admin/dashboard': typeof AdminProtectedDashboardRoute
+  '/admin/orders': typeof AdminProtectedOrdersRoute
+  '/admin/product': typeof AdminProtectedProductRoute
+  '/admin/reviews': typeof AdminProtectedReviewsRoute
+  '/admin/settings': typeof AdminProtectedSettingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/checkout': typeof CheckoutRoute
   '/order-confirmed': typeof OrderConfirmedRoute
+  '/admin/_protected': typeof AdminProtectedRouteRouteWithChildren
+  '/admin/forgot-password': typeof AdminForgotPasswordRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/reset-password': typeof AdminResetPasswordRoute
   '/policies/$slug': typeof PoliciesSlugRoute
+  '/admin/_protected/contact-messages': typeof AdminProtectedContactMessagesRoute
+  '/admin/_protected/customers': typeof AdminProtectedCustomersRoute
+  '/admin/_protected/dashboard': typeof AdminProtectedDashboardRoute
+  '/admin/_protected/orders': typeof AdminProtectedOrdersRoute
+  '/admin/_protected/product': typeof AdminProtectedProductRoute
+  '/admin/_protected/reviews': typeof AdminProtectedReviewsRoute
+  '/admin/_protected/settings': typeof AdminProtectedSettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/checkout' | '/order-confirmed' | '/policies/$slug'
+  fullPaths:
+    | '/'
+    | '/checkout'
+    | '/order-confirmed'
+    | '/admin'
+    | '/admin/forgot-password'
+    | '/admin/login'
+    | '/admin/reset-password'
+    | '/policies/$slug'
+    | '/admin/contact-messages'
+    | '/admin/customers'
+    | '/admin/dashboard'
+    | '/admin/orders'
+    | '/admin/product'
+    | '/admin/reviews'
+    | '/admin/settings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/checkout' | '/order-confirmed' | '/policies/$slug'
-  id: '__root__' | '/' | '/checkout' | '/order-confirmed' | '/policies/$slug'
+  to:
+    | '/'
+    | '/checkout'
+    | '/order-confirmed'
+    | '/admin'
+    | '/admin/forgot-password'
+    | '/admin/login'
+    | '/admin/reset-password'
+    | '/policies/$slug'
+    | '/admin/contact-messages'
+    | '/admin/customers'
+    | '/admin/dashboard'
+    | '/admin/orders'
+    | '/admin/product'
+    | '/admin/reviews'
+    | '/admin/settings'
+  id:
+    | '__root__'
+    | '/'
+    | '/checkout'
+    | '/order-confirmed'
+    | '/admin/_protected'
+    | '/admin/forgot-password'
+    | '/admin/login'
+    | '/admin/reset-password'
+    | '/policies/$slug'
+    | '/admin/_protected/contact-messages'
+    | '/admin/_protected/customers'
+    | '/admin/_protected/dashboard'
+    | '/admin/_protected/orders'
+    | '/admin/_protected/product'
+    | '/admin/_protected/reviews'
+    | '/admin/_protected/settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CheckoutRoute: typeof CheckoutRoute
   OrderConfirmedRoute: typeof OrderConfirmedRoute
+  AdminProtectedRouteRoute: typeof AdminProtectedRouteRouteWithChildren
+  AdminForgotPasswordRoute: typeof AdminForgotPasswordRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminResetPasswordRoute: typeof AdminResetPasswordRoute
   PoliciesSlugRoute: typeof PoliciesSlugRoute
 }
 
@@ -92,6 +242,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrderConfirmedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/_protected': {
+      id: '/admin/_protected'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminProtectedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/forgot-password': {
+      id: '/admin/forgot-password'
+      path: '/admin/forgot-password'
+      fullPath: '/admin/forgot-password'
+      preLoaderRoute: typeof AdminForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/reset-password': {
+      id: '/admin/reset-password'
+      path: '/admin/reset-password'
+      fullPath: '/admin/reset-password'
+      preLoaderRoute: typeof AdminResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/policies/$slug': {
       id: '/policies/$slug'
       path: '/policies/$slug'
@@ -99,13 +277,89 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PoliciesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/_protected/contact-messages': {
+      id: '/admin/_protected/contact-messages'
+      path: '/contact-messages'
+      fullPath: '/admin/contact-messages'
+      preLoaderRoute: typeof AdminProtectedContactMessagesRouteImport
+      parentRoute: typeof AdminProtectedRouteRoute
+    }
+    '/admin/_protected/customers': {
+      id: '/admin/_protected/customers'
+      path: '/customers'
+      fullPath: '/admin/customers'
+      preLoaderRoute: typeof AdminProtectedCustomersRouteImport
+      parentRoute: typeof AdminProtectedRouteRoute
+    }
+    '/admin/_protected/dashboard': {
+      id: '/admin/_protected/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminProtectedDashboardRouteImport
+      parentRoute: typeof AdminProtectedRouteRoute
+    }
+    '/admin/_protected/orders': {
+      id: '/admin/_protected/orders'
+      path: '/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminProtectedOrdersRouteImport
+      parentRoute: typeof AdminProtectedRouteRoute
+    }
+    '/admin/_protected/product': {
+      id: '/admin/_protected/product'
+      path: '/product'
+      fullPath: '/admin/product'
+      preLoaderRoute: typeof AdminProtectedProductRouteImport
+      parentRoute: typeof AdminProtectedRouteRoute
+    }
+    '/admin/_protected/reviews': {
+      id: '/admin/_protected/reviews'
+      path: '/reviews'
+      fullPath: '/admin/reviews'
+      preLoaderRoute: typeof AdminProtectedReviewsRouteImport
+      parentRoute: typeof AdminProtectedRouteRoute
+    }
+    '/admin/_protected/settings': {
+      id: '/admin/_protected/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminProtectedSettingsRouteImport
+      parentRoute: typeof AdminProtectedRouteRoute
+    }
   }
 }
+
+interface AdminProtectedRouteRouteChildren {
+  AdminProtectedContactMessagesRoute: typeof AdminProtectedContactMessagesRoute
+  AdminProtectedCustomersRoute: typeof AdminProtectedCustomersRoute
+  AdminProtectedDashboardRoute: typeof AdminProtectedDashboardRoute
+  AdminProtectedOrdersRoute: typeof AdminProtectedOrdersRoute
+  AdminProtectedProductRoute: typeof AdminProtectedProductRoute
+  AdminProtectedReviewsRoute: typeof AdminProtectedReviewsRoute
+  AdminProtectedSettingsRoute: typeof AdminProtectedSettingsRoute
+}
+
+const AdminProtectedRouteRouteChildren: AdminProtectedRouteRouteChildren = {
+  AdminProtectedContactMessagesRoute: AdminProtectedContactMessagesRoute,
+  AdminProtectedCustomersRoute: AdminProtectedCustomersRoute,
+  AdminProtectedDashboardRoute: AdminProtectedDashboardRoute,
+  AdminProtectedOrdersRoute: AdminProtectedOrdersRoute,
+  AdminProtectedProductRoute: AdminProtectedProductRoute,
+  AdminProtectedReviewsRoute: AdminProtectedReviewsRoute,
+  AdminProtectedSettingsRoute: AdminProtectedSettingsRoute,
+}
+
+const AdminProtectedRouteRouteWithChildren =
+  AdminProtectedRouteRoute._addFileChildren(AdminProtectedRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CheckoutRoute: CheckoutRoute,
   OrderConfirmedRoute: OrderConfirmedRoute,
+  AdminProtectedRouteRoute: AdminProtectedRouteRouteWithChildren,
+  AdminForgotPasswordRoute: AdminForgotPasswordRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  AdminResetPasswordRoute: AdminResetPasswordRoute,
   PoliciesSlugRoute: PoliciesSlugRoute,
 }
 export const routeTree = rootRouteImport

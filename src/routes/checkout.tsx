@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useCart } from "@/lib/cart";
+import { isSupabaseConfigured } from "@/integrations/supabase/client";
+import { paymentService } from "@/services/paymentService";
 import { contact, deliveryCharge, formatINR, product } from "@/lib/site-config";
 
 const schema = z.object({
@@ -51,6 +53,7 @@ function Checkout() {
   const cart = useCart();
   const navigate = useNavigate();
   const [errors, setErrors] = useState<Errors>({});
+  const [paying, setPaying] = useState(false);
 
   const readForm = (form: HTMLFormElement) => {
     const fd = new FormData(form);
@@ -74,24 +77,19 @@ function Checkout() {
     toast.error("Please check the highlighted fields.");
   };
 
-  const placeOrder = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (cart.quantity === 0) {
-      toast.error("Your cart is empty.");
-      return;
-    }
-    const parsed = readForm(e.currentTarget);
-    if (!parsed.success) return showErrors(parsed.error.issues);
-
-    setErrors({});
-    const orderId = `DC${Date.now().toString().slice(-8)}`;
+  const finishOrder = (
+    orderId: string,
+    data: Form,
+    payment?: { razorpay_payment_id: string; razorpay_order_id: string },
+  ) => {
     const summary = {
       orderId,
       quantity: cart.quantity,
       subtotal: cart.subtotal,
       delivery: cart.delivery,
       total: cart.total,
-      customer: parsed.data,
+      customer: data,
+      payment: payment ?? null,
     };
     try {
       sessionStorage.setItem("deal-clean-last-order", JSON.stringify(summary));
@@ -99,7 +97,71 @@ function Checkout() {
       /* ignore */
     }
     cart.remove();
-    navigate({ to: "/order-confirmed" });
+    void navigate({ to: "/order-confirmed" });
+  };
+
+  const placeOrder = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (cart.quantity === 0) {
+      toast.error("Your cart is empty.");
+      return;
+    }
+    const parsed = readForm(e.currentTarget);
+    if (!parsed.success) return showErrors(parsed.error.issues);
+    setErrors({});
+    const data = parsed.data;
+
+    // Without Supabase configured, fall back to a manual (offline) confirmation.
+    if (!isSupabaseConfigured) {
+      finishOrder(`DC${Date.now().toString().slice(-8)}`, data);
+      return;
+    }
+
+    setPaying(true);
+    try {
+      await paymentService.loadCheckout();
+      const order = await paymentService.createOrder({
+        quantity: cart.quantity,
+        customer: data,
+      });
+
+      const Razorpay = (window as unknown as { Razorpay: new (o: unknown) => { open: () => void } })
+        .Razorpay;
+      const rzp = new Razorpay({
+        key: order.key_id,
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.razorpay_order_id,
+        name: "SP Enterprises",
+        description: `${product.name} (${product.size}) x ${cart.quantity}`,
+        prefill: { name: data.name, email: data.email, contact: data.phone },
+        notes: { order_number: order.order_number },
+        theme: { color: "#E31B72" },
+        handler: async (response: {
+          razorpay_payment_id: string;
+          razorpay_order_id: string;
+          razorpay_signature: string;
+        }) => {
+          try {
+            await paymentService.verifyPayment(response);
+            finishOrder(order.order_number, data, {
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+            });
+          } catch (error) {
+            toast.error(
+              error instanceof Error ? error.message : "Payment verification failed.",
+            );
+          }
+        },
+        modal: { ondismiss: () => setPaying(false) },
+      });
+      rzp.open();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not start the payment.");
+    } finally {
+      setPaying(false);
+    }
   };
 
   const orderOnWhatsApp = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -163,10 +225,14 @@ function Checkout() {
             <div className="mt-8 rounded-2xl border border-dashed border-primary/40 bg-accent p-5 text-sm text-accent-foreground">
               <p className="flex items-center gap-2 font-semibold">
                 <CreditCard className="h-4 w-4" aria-hidden="true" />
-                Razorpay payment integration will be connected here.
+                {isSupabaseConfigured
+                  ? "Secure payment by Razorpay"
+                  : "Razorpay activates once Supabase is connected."}
               </p>
               <p className="mt-1 text-muted-foreground">
-                Until then, orders are confirmed manually by our team over phone or WhatsApp.
+                {isSupabaseConfigured
+                  ? "Your payment is verified on our server before the order is confirmed."
+                  : "Until then, orders are confirmed manually by our team over phone or WhatsApp."}
               </p>
             </div>
           </div>
@@ -234,8 +300,13 @@ function Checkout() {
                   </div>
                 </dl>
 
-                <Button type="submit" size="lg" className="mt-6 w-full rounded-full">
-                  Place Order
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="mt-6 w-full rounded-full"
+                  disabled={paying}
+                >
+                  {paying ? "Opening payment…" : isSupabaseConfigured ? "Pay & Place Order" : "Place Order"}
                 </Button>
                 <Button
                   type="button"
