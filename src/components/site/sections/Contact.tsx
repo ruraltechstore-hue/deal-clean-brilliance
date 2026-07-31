@@ -98,14 +98,7 @@ export function Contact() {
                 <a href={`tel:${(contact.phones[0] ?? "").replace(/\s/g, "")}`}>Call Now</a>
               </Button>
               <Button asChild variant="outline" className="rounded-full">
-                <a
-                  href={`https://wa.me/${contact.whatsapp}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <MessageCircle className="mr-1 h-4 w-4" aria-hidden="true" />
-                  Chat on WhatsApp
-                </a>
+                <a href={`mailto:${contact.email}`}>Email Us</a>
               </Button>
             </div>
           </div>
