@@ -75,7 +75,7 @@ function PolicyPage() {
       <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
         <h1 className="text-3xl font-extrabold sm:text-4xl">{policy.title}</h1>
         <div className="mt-8 space-y-5">
-          {policy.body.map((p) => (
+          {policy.body.map((p: string) => (
             <p key={p} className="leading-relaxed text-muted-foreground">
               {p}
             </p>
