@@ -49,19 +49,21 @@ export function Contact() {
     }
 
     setErrors({});
-    if (isSupabaseConfigured) {
-      try {
-        await adminService.submitMessage(parsed.data);
-      } catch (error) {
-        toast.error(
-          error instanceof Error ? error.message : "Could not send your message. Please call us.",
-        );
-        return;
-      }
+    if (!isSupabaseConfigured) {
+      toast.error("Messaging is not available right now. Please call us instead.");
+      return;
+    }
+    try {
+      await adminService.submitMessage(parsed.data);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Could not send your message. Please call us.",
+      );
+      return;
     }
     setSent(true);
     form.reset();
-    toast.success("Thanks! Your message has been recorded. We'll call you back shortly.");
+    toast.success("Thanks! Your message has reached our team. We'll call you back shortly.");
   };
 
   return (
