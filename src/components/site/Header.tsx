@@ -25,9 +25,9 @@ export function Header() {
           <img
             src={brand.logoUrl}
             alt="DEAL Cleaning Products logo"
-            className="h-10 w-10 shrink-0 object-contain"
-            width={40}
-            height={40}
+            className="h-11 w-11 shrink-0 scale-[1.7] object-contain"
+            width={44}
+            height={44}
           />
           <span className="min-w-0">
             <span className="block truncate font-display text-base font-extrabold leading-tight text-secondary">
