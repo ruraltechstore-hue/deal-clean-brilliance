@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CheckCircle2, MessageCircle } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/site/Header";
@@ -106,14 +106,7 @@ function OrderConfirmed() {
               <Link to="/">Back to Home</Link>
             </Button>
             <Button asChild variant="outline" className="rounded-full px-8">
-              <a
-                href={`https://wa.me/${contact.whatsapp}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <MessageCircle className="mr-1 h-4 w-4" aria-hidden="true" />
-                Contact Support
-              </a>
+              <a href={`tel:${(contact.phones[0] ?? "").replace(/\s/g, "")}`}>Contact Support</a>
             </Button>
           </div>
         </div>

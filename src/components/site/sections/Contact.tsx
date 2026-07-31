@@ -1,4 +1,4 @@
-import { MessageCircle, Phone, MapPin } from "lucide-react";
+import { Phone, MapPin } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -49,19 +49,21 @@ export function Contact() {
     }
 
     setErrors({});
-    if (isSupabaseConfigured) {
-      try {
-        await adminService.submitMessage(parsed.data);
-      } catch (error) {
-        toast.error(
-          error instanceof Error ? error.message : "Could not send your message. Please call us.",
-        );
-        return;
-      }
+    if (!isSupabaseConfigured) {
+      toast.error("Messaging is not available right now. Please call us instead.");
+      return;
+    }
+    try {
+      await adminService.submitMessage(parsed.data);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Could not send your message. Please call us.",
+      );
+      return;
     }
     setSent(true);
     form.reset();
-    toast.success("Thanks! Your message has been recorded. We'll call you back shortly.");
+    toast.success("Thanks! Your message has reached our team. We'll call you back shortly.");
   };
 
   return (
@@ -70,7 +72,7 @@ export function Contact() {
         <Reveal>
           <h2 className="text-3xl font-extrabold sm:text-4xl">Need Help With Your Order?</h2>
           <p className="mt-4 text-muted-foreground">
-            Call us or message us on WhatsApp — we'll help you place or track your order.
+            Call us or send a message below — we'll help you place or track your order.
           </p>
 
           <div className="card-premium mt-8 p-6">
@@ -96,14 +98,7 @@ export function Contact() {
                 <a href={`tel:${(contact.phones[0] ?? "").replace(/\s/g, "")}`}>Call Now</a>
               </Button>
               <Button asChild variant="outline" className="rounded-full">
-                <a
-                  href={`https://wa.me/${contact.whatsapp}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <MessageCircle className="mr-1 h-4 w-4" aria-hidden="true" />
-                  Chat on WhatsApp
-                </a>
+                <a href={`mailto:${contact.email}`}>Email Us</a>
               </Button>
             </div>
           </div>

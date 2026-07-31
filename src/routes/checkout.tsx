@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { CreditCard, MessageCircle, Minus, Plus } from "lucide-react";
+import { CreditCard, Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -164,20 +164,6 @@ function Checkout() {
     }
   };
 
-  const orderOnWhatsApp = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const form = e.currentTarget.closest("form");
-    if (!form) return;
-    if (cart.quantity === 0) {
-      toast.error("Your cart is empty.");
-      return;
-    }
-    const parsed = readForm(form);
-    if (!parsed.success) return showErrors(parsed.error.issues);
-    const d = parsed.data;
-    const text = `Hello SP Enterprises, I would like to order:%0A%0A${product.name} (${product.size}) x ${cart.quantity}%0ASubtotal: ${formatINR(cart.subtotal)}%0ADelivery: ${formatINR(cart.delivery)}%0ATotal: ${formatINR(cart.total)}%0A%0AName: ${d.name}%0APhone: ${d.phone}%0AEmail: ${d.email}%0AAddress: ${d.address}, ${d.city}, ${d.state} - ${d.pincode}`;
-    window.open(`https://wa.me/${contact.whatsapp}?text=${text}`, "_blank", "noopener");
-  };
-
   const field = (
     id: keyof Form,
     label: string,
@@ -232,7 +218,7 @@ function Checkout() {
               <p className="mt-1 text-muted-foreground">
                 {isSupabaseConfigured
                   ? "Your payment is verified on our server before the order is confirmed."
-                  : "Until then, orders are confirmed manually by our team over phone or WhatsApp."}
+                  : "Until then, orders are confirmed manually by our team over phone."}
               </p>
             </div>
           </div>
@@ -307,16 +293,6 @@ function Checkout() {
                   disabled={paying}
                 >
                   {paying ? "Opening payment…" : isSupabaseConfigured ? "Pay & Place Order" : "Place Order"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="lg"
-                  className="mt-3 w-full rounded-full"
-                  onClick={orderOnWhatsApp}
-                >
-                  <MessageCircle className="mr-1 h-4 w-4" aria-hidden="true" />
-                  Order through WhatsApp
                 </Button>
               </>
             )}

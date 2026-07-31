@@ -33,7 +33,6 @@ export const deliveryCharge = 60;
 
 export const contact = {
   phones: ["+91 6300553190", "+91 9848855075"],
-  whatsapp: "916300553190",
   email: "spenterprises.deal@gmail.com",
 };
 
