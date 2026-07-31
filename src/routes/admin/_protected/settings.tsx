@@ -57,7 +57,6 @@ function SettingsAdmin() {
         business_email: String(fd.get("business_email")),
         phone_number_1: String(fd.get("phone_number_1")),
         phone_number_2: String(fd.get("phone_number_2")),
-        whatsapp_number: String(fd.get("whatsapp_number")),
         delivery_charge: Number(fd.get("delivery_charge")),
         free_delivery_threshold: fd.get("free_delivery_threshold")
           ? Number(fd.get("free_delivery_threshold"))
@@ -87,7 +86,6 @@ function SettingsAdmin() {
         {text("business_email", "Business email", "email")}
         {text("phone_number_1", "Phone number 1")}
         {text("phone_number_2", "Phone number 2")}
-        {text("whatsapp_number", "WhatsApp number")}
         {text("order_prefix", "Order number prefix")}
         {text("delivery_charge", "Delivery charge (INR)", "number")}
         {text("free_delivery_threshold", "Free delivery above (INR)", "number")}
