@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     q: "How can I place an order?",
-    a: "Add the product to your cart and complete the checkout process, or contact us through WhatsApp for assistance.",
+    a: "Add the product to your cart and complete the checkout process, or call us for assistance.",
   },
 ];
 
