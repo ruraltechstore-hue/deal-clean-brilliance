@@ -72,7 +72,7 @@ export function Contact() {
         <Reveal>
           <h2 className="text-3xl font-extrabold sm:text-4xl">Need Help With Your Order?</h2>
           <p className="mt-4 text-muted-foreground">
-            Call us or message us on WhatsApp — we'll help you place or track your order.
+            Call us or send a message below — we'll help you place or track your order.
           </p>
 
           <div className="card-premium mt-8 p-6">
