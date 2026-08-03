@@ -11,19 +11,32 @@ export const brand = {
   logoUrl: "/assets/deal-logo.png",
 };
 
-export const product = {
-  id: "deal-clean-500ml",
-  name: "DEAL CLEAN – All in One",
-  size: "500 ml",
-  /** Product price in INR — edit here */
-  price: 200,
-  /** Set to false to show "Out of Stock" */
-  available: true,
-  stock: 250,
-  imageUrl: "/assets/deal-bottle.png",
-  description:
-    "A powerful multipurpose cleaning solution designed to clean, shine, and freshen a wide range of surfaces.",
-};
+export const products = [
+  {
+    id: "deal-clean-500ml",
+    name: "DEAL CLEAN – All in One",
+    size: "500 ml",
+    /** Product price in INR — edit here */
+    price: 200,
+    /** Set to false to show "Out of Stock" */
+    available: true,
+    stock: 250,
+    imageUrl: "/assets/bottle2.png",
+    description:
+      "A powerful multipurpose cleaning solution designed to clean, shine, and freshen a wide range of surfaces.",
+  },
+  {
+    id: "deal-clean-5l",
+    name: "DEAL CLEAN – All in One (Bulk)",
+    size: "5 L",
+    price: 1500,
+    available: true,
+    stock: 100,
+    imageUrl: "/assets/bottle1.png",
+    description:
+      "Our powerful multipurpose cleaning solution in a bulk 5L container. Ideal for commercial or long-term home use.",
+  },
+];
 
 /** Delivery charge in INR — edit here (0 = free delivery) */
 export const deliveryCharge = 60;

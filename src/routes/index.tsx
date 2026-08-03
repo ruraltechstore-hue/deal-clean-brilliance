@@ -11,23 +11,25 @@ import { BeforeAfter } from "@/components/site/sections/BeforeAfter";
 import { Reviews } from "@/components/site/sections/Reviews";
 import { Faq } from "@/components/site/sections/Faq";
 import { Contact } from "@/components/site/sections/Contact";
-import { product } from "@/lib/site-config";
+import { products } from "@/lib/site-config";
+
+const primaryProduct = products[0];
 
 const description =
-  "Shop DEAL CLEAN 500 ml, a powerful all-in-one cleaning solution designed to clean, shine, and freshen multiple suitable surfaces.";
+  `Shop ${primaryProduct.name}, a powerful all-in-one cleaning solution designed to clean, shine, and freshen multiple suitable surfaces.`;
 
 const productJsonLd = JSON.stringify({
   "@context": "https://schema.org",
   "@type": "Product",
-  name: product.name,
-  description: product.description,
+  name: primaryProduct.name,
+  description: primaryProduct.description,
   brand: { "@type": "Brand", name: "DEAL Cleaning Products" },
-  size: product.size,
+  size: primaryProduct.size,
   offers: {
     "@type": "Offer",
     priceCurrency: "INR",
-    price: product.price,
-    availability: product.available
+    price: primaryProduct.price,
+    availability: primaryProduct.available
       ? "https://schema.org/InStock"
       : "https://schema.org/OutOfStock",
   },

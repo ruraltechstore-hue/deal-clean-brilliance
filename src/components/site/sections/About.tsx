@@ -1,7 +1,8 @@
 import { Reveal } from "@/components/site/Reveal";
-import { brand, product } from "@/lib/site-config";
+import { brand, products } from "@/lib/site-config";
 
 export function About() {
+  const primaryProduct = products[0];
   return (
     <section id="about" className="scroll-mt-24 bg-background py-16 sm:py-24">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -12,7 +13,7 @@ export function About() {
           </h2>
           <p className="mt-5 leading-relaxed text-muted-foreground">
             {brand.name} is a cleaning brand from {brand.company}, based in {brand.address}. We keep
-            our range deliberately simple: one high-performance liquid, {product.size}, made to
+            our range deliberately simple: one high-performance liquid, {primaryProduct.size}, made to
             clean, shine, and freshen the surfaces you use every day — floors, tiles, kitchens,
             glass, steel, bathrooms, and more.
           </p>

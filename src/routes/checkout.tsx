@@ -12,7 +12,7 @@ import { Footer } from "@/components/site/Footer";
 import { useCart } from "@/lib/cart";
 import { isSupabaseConfigured } from "@/integrations/supabase/client";
 import { paymentService } from "@/services/paymentService";
-import { contact, deliveryCharge, formatINR, product } from "@/lib/site-config";
+import { contact, deliveryCharge, formatINR, products } from "@/lib/site-config";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Enter your full name").max(80),
@@ -34,14 +34,14 @@ export const Route = createFileRoute("/checkout")({
   component: Checkout,
   head: () => ({
     meta: [
-      { title: "Checkout | DEAL CLEAN 500 ml" },
+      { title: "Checkout | DEAL CLEAN Store" },
       {
         name: "description",
         content:
-          "Complete your DEAL CLEAN 500 ml order — enter your delivery details and confirm your purchase.",
+          "Complete your DEAL CLEAN order — enter your delivery details and confirm your purchase.",
       },
-      { property: "og:title", content: "Checkout | DEAL CLEAN 500 ml" },
-      { property: "og:description", content: "Complete your DEAL CLEAN 500 ml order." },
+      { property: "og:title", content: "Checkout | DEAL CLEAN Store" },
+      { property: "og:description", content: "Complete your DEAL CLEAN order." },
       { property: "og:url", content: "/checkout" },
       { name: "robots", content: "noindex" },
     ],
@@ -54,6 +54,15 @@ function Checkout() {
   const navigate = useNavigate();
   const [errors, setErrors] = useState<Errors>({});
   const [paying, setPaying] = useState(false);
+
+  const cartItems = Object.entries(cart.items)
+    .map(([id, quantity]) => {
+      const product = products.find((p) => p.id === id);
+      return product ? { product, quantity } : null;
+    })
+    .filter((item): item is { product: typeof products[0]; quantity: number } => item !== null);
+
+  const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   const readForm = (form: HTMLFormElement) => {
     const fd = new FormData(form);
@@ -84,7 +93,8 @@ function Checkout() {
   ) => {
     const summary = {
       orderId,
-      quantity: cart.quantity,
+      items: cartItems.map((item) => ({ id: item.product.id, quantity: item.quantity })),
+      totalQuantity,
       subtotal: cart.subtotal,
       delivery: cart.delivery,
       total: cart.total,
@@ -102,7 +112,7 @@ function Checkout() {
 
   const placeOrder = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (cart.quantity === 0) {
+    if (totalQuantity === 0) {
       toast.error("Your cart is empty.");
       return;
     }
@@ -111,7 +121,6 @@ function Checkout() {
     setErrors({});
     const data = parsed.data;
 
-    // Without Supabase configured, fall back to a manual (offline) confirmation.
     if (!isSupabaseConfigured) {
       finishOrder(`DC${Date.now().toString().slice(-8)}`, data);
       return;
@@ -121,7 +130,7 @@ function Checkout() {
     try {
       await paymentService.loadCheckout();
       const order = await paymentService.createOrder({
-        quantity: cart.quantity,
+        quantity: totalQuantity,
         customer: data,
       });
 
@@ -133,7 +142,7 @@ function Checkout() {
         currency: order.currency,
         order_id: order.razorpay_order_id,
         name: "SP Enterprises",
-        description: `${product.name} (${product.size}) x ${cart.quantity}`,
+        description: `DEAL CLEAN Order (${totalQuantity} items)`,
         prefill: { name: data.name, email: data.email, contact: data.phone },
         notes: { order_number: order.order_number },
         theme: { color: "#E31B72" },
@@ -182,7 +191,7 @@ function Checkout() {
       <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         <h1 className="text-3xl font-extrabold sm:text-4xl">Checkout</h1>
         <p className="mt-2 text-muted-foreground">
-          Delivering DEAL CLEAN {product.size} across India from Katedan, Hyderabad.
+          Delivering DEAL CLEAN products across India from Katedan, Hyderabad.
         </p>
 
         <form onSubmit={placeOrder} noValidate className="mt-10 grid gap-8 lg:grid-cols-[1.2fr_1fr]">
@@ -226,49 +235,53 @@ function Checkout() {
           <aside className="card-premium h-fit p-6 sm:p-8">
             <h2 className="text-xl font-bold">Order summary</h2>
 
-            {cart.quantity === 0 ? (
+            {cartItems.length === 0 ? (
               <div className="py-10 text-center">
                 <p className="text-sm text-muted-foreground">Your cart is empty.</p>
                 <Button asChild className="mt-4 rounded-full">
                   <Link to="/" hash="buy">
-                    Back to product
+                    Continue Shopping
                   </Link>
                 </Button>
               </div>
             ) : (
               <>
-                <div className="mt-5 flex gap-4">
-                  <img
-                    src={product.imageUrl}
-                    alt={`${product.name} ${product.size} bottle`}
-                    loading="lazy"
-                    className="h-24 w-16 rounded-lg object-contain"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold">{product.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {product.size} · {formatINR(product.price)}
-                    </p>
-                    <div className="mt-3 flex items-center rounded-full border border-border w-fit">
-                      <button
-                        type="button"
-                        aria-label="Decrease quantity"
-                        className="grid h-8 w-8 place-items-center rounded-full hover:bg-accent"
-                        onClick={() => cart.setQuantity(cart.quantity - 1)}
-                      >
-                        <Minus className="h-4 w-4" aria-hidden="true" />
-                      </button>
-                      <span className="w-8 text-center text-sm font-semibold">{cart.quantity}</span>
-                      <button
-                        type="button"
-                        aria-label="Increase quantity"
-                        className="grid h-8 w-8 place-items-center rounded-full hover:bg-accent"
-                        onClick={() => cart.setQuantity(cart.quantity + 1)}
-                      >
-                        <Plus className="h-4 w-4" aria-hidden="true" />
-                      </button>
+                <div className="mt-5 space-y-4">
+                  {cartItems.map(({ product, quantity }) => (
+                    <div key={product.id} className="flex gap-4">
+                      <img
+                        src={product.imageUrl}
+                        alt={`${product.name} ${product.size} bottle`}
+                        loading="lazy"
+                        className="h-24 w-16 rounded-lg object-contain"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold">{product.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {product.size} · {formatINR(product.price)}
+                        </p>
+                        <div className="mt-3 flex items-center rounded-full border border-border w-fit">
+                          <button
+                            type="button"
+                            aria-label="Decrease quantity"
+                            className="grid h-8 w-8 place-items-center rounded-full hover:bg-accent"
+                            onClick={() => cart.setQuantity(product.id, quantity - 1)}
+                          >
+                            <Minus className="h-4 w-4" aria-hidden="true" />
+                          </button>
+                          <span className="w-8 text-center text-sm font-semibold">{quantity}</span>
+                          <button
+                            type="button"
+                            aria-label="Increase quantity"
+                            className="grid h-8 w-8 place-items-center rounded-full hover:bg-accent"
+                            onClick={() => cart.setQuantity(product.id, quantity + 1)}
+                          >
+                            <Plus className="h-4 w-4" aria-hidden="true" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
 
                 <dl className="mt-6 space-y-2 border-t border-border pt-4 text-sm">
@@ -278,7 +291,7 @@ function Checkout() {
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">Delivery charges</dt>
-                    <dd className="font-medium">{formatINR(deliveryCharge)}</dd>
+                    <dd className="font-medium">{formatINR(cart.delivery)}</dd>
                   </div>
                   <div className="flex justify-between border-t border-border pt-3 text-base">
                     <dt className="font-semibold">Total</dt>

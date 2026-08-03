@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
-import { contact, formatINR, product } from "@/lib/site-config";
+import { contact, formatINR, products } from "@/lib/site-config";
 
 type Order = {
   orderId: string;
-  quantity: number;
+  items: { id: string; quantity: number }[];
+  totalQuantity: number;
   subtotal: number;
   delivery: number;
   total: number;
@@ -27,10 +28,10 @@ export const Route = createFileRoute("/order-confirmed")({
   component: OrderConfirmed,
   head: () => ({
     meta: [
-      { title: "Order Confirmed | DEAL CLEAN 500 ml" },
+      { title: "Order Confirmed | DEAL CLEAN Store" },
       {
         name: "description",
-        content: "Your DEAL CLEAN 500 ml order has been received by SP Enterprises, Hyderabad.",
+        content: "Your DEAL CLEAN order has been received by SP Enterprises, Hyderabad.",
       },
       { property: "og:title", content: "Order Confirmed | DEAL CLEAN" },
       { property: "og:description", content: "Your DEAL CLEAN order has been received." },
@@ -71,10 +72,20 @@ function OrderConfirmed() {
                 Order #{order.orderId}
               </p>
               <dl className="mt-4 space-y-2">
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">
-                    {product.name} ({product.size}) × {order.quantity}
-                  </dt>
+                {order.items?.map((item, idx) => {
+                  const prod = products.find((p) => p.id === item.id);
+                  if (!prod) return null;
+                  return (
+                    <div key={idx} className="flex justify-between">
+                      <dt className="text-muted-foreground">
+                        {prod.name} ({prod.size}) × {item.quantity}
+                      </dt>
+                      <dd className="font-medium">{formatINR(prod.price * item.quantity)}</dd>
+                    </div>
+                  );
+                })}
+                <div className="flex justify-between border-t border-border pt-2">
+                  <dt className="text-muted-foreground">Subtotal</dt>
                   <dd className="font-medium">{formatINR(order.subtotal)}</dd>
                 </div>
                 <div className="flex justify-between">

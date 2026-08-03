@@ -1,13 +1,13 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { deliveryCharge, product } from "@/lib/site-config";
+import { deliveryCharge, products } from "@/lib/site-config";
 
 const STORAGE_KEY = "deal-clean-cart-v1";
 
 type CartState = {
-  quantity: number;
-  add: (qty?: number) => void;
-  setQuantity: (qty: number) => void;
-  remove: () => void;
+  items: Record<string, number>;
+  add: (productId: string, qty?: number) => void;
+  setQuantity: (productId: string, qty: number) => void;
+  remove: (productId?: string) => void;
   subtotal: number;
   delivery: number;
   total: number;
@@ -17,15 +17,23 @@ type CartState = {
 const CartContext = createContext<CartState | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [quantity, setQty] = useState(0);
+  const [items, setItems] = useState<Record<string, number>>({});
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw) as { quantity?: number };
-        if (typeof parsed.quantity === "number") setQty(Math.max(0, Math.floor(parsed.quantity)));
+        const parsed = JSON.parse(raw) as { items?: Record<string, number> };
+        if (parsed.items) {
+          const validItems: Record<string, number> = {};
+          for (const [id, qty] of Object.entries(parsed.items)) {
+            if (typeof qty === "number" && qty > 0) {
+              validItems[id] = Math.floor(qty);
+            }
+          }
+          setItems(validItems);
+        }
       }
     } catch {
       /* ignore */
@@ -36,26 +44,61 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!hydrated) return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ quantity }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ items }));
     } catch {
       /* ignore */
     }
-  }, [quantity, hydrated]);
+  }, [items, hydrated]);
 
   const value = useMemo<CartState>(() => {
-    const subtotal = quantity * product.price;
-    const delivery = quantity > 0 ? deliveryCharge : 0;
+    let subtotal = 0;
+    let totalItems = 0;
+    
+    for (const [id, qty] of Object.entries(items)) {
+      const p = products.find((x) => x.id === id);
+      if (p) {
+        subtotal += qty * p.price;
+        totalItems += qty;
+      }
+    }
+
+    const delivery = totalItems > 0 ? deliveryCharge : 0;
+    
     return {
-      quantity,
+      items,
       hydrated,
-      add: (qty = 1) => setQty((q) => Math.min(99, q + qty)),
-      setQuantity: (qty: number) => setQty(Math.max(0, Math.min(99, Math.floor(qty)))),
-      remove: () => setQty(0),
+      add: (productId: string, qty = 1) => 
+        setItems((prev) => ({
+          ...prev,
+          [productId]: Math.min(99, (prev[productId] || 0) + qty),
+        })),
+      setQuantity: (productId: string, qty: number) => 
+        setItems((prev) => {
+          const next = { ...prev };
+          const validQty = Math.max(0, Math.min(99, Math.floor(qty)));
+          if (validQty === 0) {
+            delete next[productId];
+          } else {
+            next[productId] = validQty;
+          }
+          return next;
+        }),
+      remove: (productId?: string) => {
+        if (productId) {
+          setItems((prev) => {
+            const next = { ...prev };
+            delete next[productId];
+            return next;
+          });
+        } else {
+          setItems({}); // Clear entire cart
+        }
+      },
       subtotal,
       delivery,
       total: subtotal + delivery,
     };
-  }, [quantity, hydrated]);
+  }, [items, hydrated]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
