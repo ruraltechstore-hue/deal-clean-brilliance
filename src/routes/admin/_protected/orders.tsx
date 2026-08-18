@@ -57,7 +57,7 @@ function Orders() {
               <tr key={o.id} className="border-t border-border align-top">
                 <td className="py-3 font-medium">
                   {o.order_number}
-                  <div className="text-xs text-muted-foreground">{o.razorpay_payment_id ?? "—"}</div>
+                  <div className="text-xs text-muted-foreground">{o.transaction_id ?? o.razorpay_payment_id ?? "—"}</div>
                 </td>
                 <td className="py-3">{new Date(o.created_at).toLocaleDateString("en-IN")}</td>
                 <td className="py-3">

@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import QRCode from "react-qr-code";
 import { CreditCard, Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -25,6 +26,7 @@ const schema = z.object({
   city: z.string().trim().min(2, "Enter your city").max(60),
   state: z.string().trim().min(2, "Enter your state").max(60),
   pincode: z.string().trim().regex(/^[1-9][0-9]{5}$/, "Enter a valid 6-digit pincode"),
+  transactionId: z.string().trim().min(5, "Enter a valid transaction ID"),
 });
 
 type Form = z.infer<typeof schema>;
@@ -74,6 +76,7 @@ function Checkout() {
       city: String(fd.get("city") ?? ""),
       state: String(fd.get("state") ?? ""),
       pincode: String(fd.get("pincode") ?? ""),
+      transactionId: String(fd.get("transactionId") ?? ""),
     });
   };
 
@@ -89,7 +92,7 @@ function Checkout() {
   const finishOrder = (
     orderId: string,
     data: Form,
-    payment?: { razorpay_payment_id: string; razorpay_order_id: string },
+    transactionId?: string,
   ) => {
     const summary = {
       orderId,
@@ -99,7 +102,7 @@ function Checkout() {
       delivery: cart.delivery,
       total: cart.total,
       customer: data,
-      payment: payment ?? null,
+      payment: { transaction_id: transactionId ?? data.transactionId },
     };
     try {
       sessionStorage.setItem("deal-clean-last-order", JSON.stringify(summary));
@@ -128,46 +131,15 @@ function Checkout() {
 
     setPaying(true);
     try {
-      await paymentService.loadCheckout();
       const order = await paymentService.createOrder({
         quantity: totalQuantity,
+        transactionId: data.transactionId,
         customer: data,
       });
 
-      const Razorpay = (window as unknown as { Razorpay: new (o: unknown) => { open: () => void } })
-        .Razorpay;
-      const rzp = new Razorpay({
-        key: order.key_id,
-        amount: order.amount,
-        currency: order.currency,
-        order_id: order.razorpay_order_id,
-        name: "SP Enterprises",
-        description: `DEAL CLEAN Order (${totalQuantity} items)`,
-        prefill: { name: data.name, email: data.email, contact: data.phone },
-        notes: { order_number: order.order_number },
-        theme: { color: "#E31B72" },
-        handler: async (response: {
-          razorpay_payment_id: string;
-          razorpay_order_id: string;
-          razorpay_signature: string;
-        }) => {
-          try {
-            await paymentService.verifyPayment(response);
-            finishOrder(order.order_number, data, {
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id,
-            });
-          } catch (error) {
-            toast.error(
-              error instanceof Error ? error.message : "Payment verification failed.",
-            );
-          }
-        },
-        modal: { ondismiss: () => setPaying(false) },
-      });
-      rzp.open();
+      finishOrder(order.order_number, data, data.transactionId);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not start the payment.");
+      toast.error(error instanceof Error ? error.message : "Could not place the order.");
     } finally {
       setPaying(false);
     }
@@ -220,15 +192,23 @@ function Checkout() {
             <div className="mt-8 rounded-2xl border border-dashed border-primary/40 bg-accent p-5 text-sm text-accent-foreground">
               <p className="flex items-center gap-2 font-semibold">
                 <CreditCard className="h-4 w-4" aria-hidden="true" />
-                {isSupabaseConfigured
-                  ? "Secure payment by Razorpay"
-                  : "Razorpay activates once Supabase is connected."}
+                Scan and Pay
               </p>
-              <p className="mt-1 text-muted-foreground">
-                {isSupabaseConfigured
-                  ? "Your payment is verified on our server before the order is confirmed."
-                  : "Until then, orders are confirmed manually by our team over phone."}
-              </p>
+              <div className="mt-4 flex flex-col items-center gap-4">
+                <div className="bg-white p-3 rounded-lg shadow-sm">
+                  <QRCode
+                    value={`upi://pay?pa=SPENTERPRISES.eazypay2@icici&pn=S P ENTERPRISES&tr=EZYS6300137425&cu=INR&mc=7210&am=${cart.total}`}
+                    size={200}
+                    level="H"
+                  />
+                </div>
+                <p className="text-center text-muted-foreground">
+                  Scan the QR code above to make your payment securely. Once paid, please enter the Transaction ID below to confirm your order.
+                </p>
+                <div className="w-full mt-2 text-left">
+                  {field("transactionId", "Transaction ID / Reference No.", { placeholder: "e.g., T23120..." })}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -305,7 +285,7 @@ function Checkout() {
                   className="mt-6 w-full rounded-full"
                   disabled={paying}
                 >
-                  {paying ? "Opening payment…" : isSupabaseConfigured ? "Pay & Place Order" : "Place Order"}
+                  {paying ? "Placing Order…" : "Place Order"}
                 </Button>
               </>
             )}

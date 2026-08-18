@@ -3,26 +3,24 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, json } from "../_shared/utils.ts";
 
 /**
- * create-razorpay-order
- * Creates a Razorpay order for the requested quantity and stores a PENDING
- * order row. Prices come from the database — never from the client.
- *
- * Secrets: RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET,
- *          SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+ * create-order
+ * Creates an order manually with a user-provided transaction ID.
+ * Prices come from the database — never from the client.
  */
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const keyId = Deno.env.get("RAZORPAY_KEY_ID");
-    const keySecret = Deno.env.get("RAZORPAY_KEY_SECRET");
-    if (!keyId || !keySecret) return json({ error: "Razorpay is not configured" }, 500);
-
     const body = await req.json();
     const quantity = Number(body?.quantity);
+    const transactionId = body?.transactionId;
     const c = body?.customer ?? {};
+    
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) {
       return json({ error: "Invalid quantity" }, 400);
+    }
+    if (!transactionId || String(transactionId).trim() === "") {
+      return json({ error: "Missing transaction ID" }, 400);
     }
     for (const field of ["name", "phone", "email", "address", "city", "state", "pincode"]) {
       if (!String(c[field] ?? "").trim()) return json({ error: `Missing ${field}` }, 400);
@@ -57,25 +55,6 @@ Deno.serve(async (req) => {
     const total = subtotal + deliveryCharge;
     const orderNumber = `${settings?.order_prefix ?? "DEAL-"}${Date.now().toString(36).toUpperCase()}`;
 
-    // Create the Razorpay order (amount in paise).
-    const rzpRes = await fetch("https://api.razorpay.com/v1/orders", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Basic ${btoa(`${keyId}:${keySecret}`)}`,
-      },
-      body: JSON.stringify({
-        amount: Math.round(total * 100),
-        currency: "INR",
-        receipt: orderNumber,
-        notes: { order_number: orderNumber, customer_name: c.name, phone: c.phone },
-      }),
-    });
-    const rzpOrder: any = await rzpRes.json();
-    if (!rzpRes.ok) {
-      return json({ error: rzpOrder?.error?.description ?? "Razorpay order failed" }, 502);
-    }
-
     // Upsert the customer, then store a pending order.
     const { data: customer, error: customerError } = await admin
       .from("customers")
@@ -94,7 +73,7 @@ Deno.serve(async (req) => {
       total_amount: total,
       payment_status: "pending",
       order_status: "new",
-      razorpay_order_id: rzpOrder.id,
+      transaction_id: String(transactionId).trim(),
       shipping_address: c.address,
       city: c.city,
       state: c.state,
@@ -103,11 +82,8 @@ Deno.serve(async (req) => {
     if (orderError) return json({ error: orderError.message }, 500);
 
     return json({
-      razorpay_order_id: rzpOrder.id,
-      amount: rzpOrder.amount,
-      currency: rzpOrder.currency,
-      key_id: keyId,
       order_number: orderNumber,
+      amount: total,
     });
   } catch (error) {
     return json({ error: error instanceof Error ? error.message : "Unexpected error" }, 500);

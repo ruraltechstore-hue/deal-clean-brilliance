@@ -54,6 +54,7 @@ export type Order = {
   order_status: OrderStatus;
   razorpay_order_id: string | null;
   razorpay_payment_id: string | null;
+  transaction_id: string | null;
   shipping_address: string | null;
   city: string | null;
   state: string | null;
